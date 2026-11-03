@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { CaptionService } from '../../core/captioning.service';
 import { MpSlot, SLOT_INFO, Slot } from '../../core/defaults';
 import { EmbeddingService } from '../../core/embedding.service';
 import { ModelStore } from '../../core/model-store.service';
@@ -98,6 +99,33 @@ import { SettingsService } from '../../core/settings.service';
       </section>
 
       <section class="panel">
+        <div class="row" style="justify-content:space-between">
+          <h2 style="margin:0">{{ info.captioning.title }}</h2>
+          <span class="badge" [class]="store.status().captioning.state">{{ label(store.status().captioning.state) }}</span>
+        </div>
+        <p class="muted">{{ info.captioning.hint }}</p>
+        <label class="field">Modello
+          <input type="text" list="caption-presets" [value]="settings.value().captioning.modelId" (change)="setCaptioning({ modelId: $any($event.target).value.trim() })" />
+          <datalist id="caption-presets">
+            <option value="Xenova/vit-gpt2-image-captioning"></option>
+          </datalist>
+        </label>
+        <label class="field">Dispositivo
+          <select (change)="setCaptioning({ device: $any($event.target).value })">
+            <option value="webgpu" [selected]="settings.value().captioning.device === 'webgpu'">WebGPU (veloce)</option>
+            <option value="wasm" [selected]="settings.value().captioning.device === 'wasm'">CPU / WASM (compatibile)</option>
+          </select>
+        </label>
+        <label class="row">
+          <input type="checkbox" [checked]="settings.value().captioning.local" (change)="setCaptioning({ local: $any($event.target).checked })" />
+          <span>Usa un modello già presente in <span class="mono">public/models/</span></span>
+        </label>
+        @if (store.status().captioning.state === 'loading') { <div class="meter" style="margin-top:.5rem"><i [style.width.%]="store.status().captioning.progress * 100"></i></div> }
+        @if (store.status().captioning.message && store.status().captioning.state !== 'loading') { <p class="mono muted">{{ store.status().captioning.message }}</p> }
+        <button class="btn" style="margin-top:.5rem" [disabled]="store.status().captioning.state === 'loading'" (click)="warm('captioning')">Carica ora</button>
+      </section>
+
+      <section class="panel">
         <h2>Accelerazione MediaPipe</h2>
         <label class="field">Delegato
           <select (change)="setDelegate($any($event.target).value)">
@@ -114,6 +142,7 @@ export class Settings {
   protected readonly store = inject(ModelStore);
   private readonly embeddings = inject(EmbeddingService);
   private readonly ocr = inject(OcrService);
+  private readonly caption = inject(CaptionService);
 
   protected readonly info = SLOT_INFO;
   protected readonly mpSlots: MpSlot[] = ['hand', 'face', 'segmenter'];
@@ -144,6 +173,10 @@ export class Settings {
     this.settings.update((s) => ({ ...s, ocr: { ...s.ocr, ...patch } }));
   }
 
+  protected setCaptioning(patch: Partial<ReturnType<SettingsService['value']>['captioning']>): void {
+    this.settings.update((s) => ({ ...s, captioning: { ...s.captioning, ...patch } }));
+  }
+
   protected setDelegate(delegate: 'GPU' | 'CPU'): void {
     this.settings.update((s) => ({ ...s, delegate }));
   }
@@ -152,6 +185,7 @@ export class Settings {
     try {
       if (slot === 'embedding') await this.embeddings.ensure();
       else if (slot === 'ocr') await this.ocr.ensure();
+      else if (slot === 'captioning') await this.caption.ensure();
       else await this.store.load(slot);
     } catch {
       /* l'errore è già visibile nello stato dello slot */
@@ -159,6 +193,6 @@ export class Settings {
   }
 
   protected async preloadAll(): Promise<void> {
-    await Promise.allSettled((['hand', 'face', 'segmenter', 'embedding', 'ocr'] as Slot[]).map((s) => this.warm(s)));
+    await Promise.allSettled((['hand', 'face', 'segmenter', 'embedding', 'ocr', 'captioning'] as Slot[]).map((s) => this.warm(s)));
   }
 }

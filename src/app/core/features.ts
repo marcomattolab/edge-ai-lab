@@ -60,6 +60,24 @@ export const FEATURES: Feature[] = [
     tone: '#f08c00',
     icon: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
   },
+  {
+    path: 'vision-assist',
+    label: 'Assistente visivo',
+    name: 'Assistente visivo',
+    description: 'Per persone non vedenti o ipovedenti: descrive la scena o legge testi ad alta voce.',
+    slot: 'captioning',
+    tone: '#0ca678',
+    icon: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+  },
+  {
+    path: 'sicilian-gestures',
+    label: 'Gesti siciliani',
+    name: 'Gesti siciliani',
+    description: 'Riconosce i gesti della mano siciliani e compie azioni: corna, a pigna, pollice su…',
+    slot: 'hand',
+    tone: '#e8590c',
+    icon: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+  },
 ];
 
 export const HOME_ICON = '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>';

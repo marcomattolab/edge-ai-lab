@@ -1,5 +1,5 @@
 export type MpSlot = 'hand' | 'face' | 'segmenter';
-export type Slot = MpSlot | 'embedding' | 'ocr';
+export type Slot = MpSlot | 'embedding' | 'ocr' | 'captioning';
 
 export interface ModelSource {
   kind: 'url' | 'file';
@@ -12,6 +12,7 @@ export interface AppSettings {
   models: Record<MpSlot, ModelSource>;
   embedding: { modelId: string; device: 'webgpu' | 'wasm'; local: boolean };
   ocr: { lang: string; langPath: string };
+  captioning: { modelId: string; device: 'webgpu' | 'wasm'; local: boolean };
 }
 
 const LOCAL = '/models/mediapipe';
@@ -34,6 +35,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   },
   embedding: { modelId: 'Xenova/paraphrase-multilingual-MiniLM-L12-v2', device: 'wasm', local: true },
   ocr: { lang: 'ita+eng', langPath: '/vendor/tessdata' },
+  captioning: { modelId: 'Xenova/vit-gpt2-image-captioning', device: 'wasm', local: false },
 };
 
 export const SLOT_INFO: Record<Slot, { title: string; hint: string }> = {
@@ -41,5 +43,6 @@ export const SLOT_INFO: Record<Slot, { title: string; hint: string }> = {
   face: { title: 'Face Landmarker', hint: 'Usato dal Cursore con la testa (.task)' },
   segmenter: { title: 'Selfie Segmenter', hint: 'Usato dallo Sfondo intelligente (.tflite)' },
   embedding: { title: 'Embeddings', hint: 'Usato dalla Ricerca semantica (Transformers.js)' },
-  ocr: { title: 'OCR', hint: 'Usato da OCR e redazione dati personali (Tesseract)' },
+  ocr: { title: 'OCR', hint: 'Usato da OCR, redazione dati personali e Assistente visivo (Tesseract)' },
+  captioning: { title: 'Descrizione immagini', hint: 'Usato dall\'Assistente visivo (Transformers.js, image-to-text)' },
 };

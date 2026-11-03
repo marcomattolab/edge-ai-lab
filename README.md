@@ -24,6 +24,8 @@ Applicazione Angular 22 che mostra cinque funzioni di intelligenza artificiale e
 | **Sfondo intelligente** | `/background` | Sfocare o sostituire lo sfondo del video | Webcam | MediaPipe Selfie Segmenter (`.tflite`) | Thread principale, GPU con ripiego su CPU |
 | **Ricerca semantica** | `/semantic-search` | Cercare per significato in note e documenti | Testo incollato, file `.txt` e `.md` | Transformers.js, embeddings multilingue (ONNX) | Web Worker, CPU (WASM) o WebGPU |
 | **OCR e dati personali** | `/pii-ocr` | Leggere un documento e oscurare i dati personali | Immagine | Tesseract.js e regole di riconoscimento | Worker di Tesseract |
+| **Assistente visivo** | `/vision-assist` | Descrivere una scena o leggere testi ad alta voce per persone non vedenti o ipovedenti | Webcam o immagine | Transformers.js image-to-text + Tesseract + sintesi vocale del sistema | Web Worker (WASM/WebGPU) + worker Tesseract |
+| **Gesti siciliani** | `/sicilian-gestures` | Riconoscere i gesti della mano siciliani e compiere azioni | Webcam | MediaPipe Hand Landmarker + euristiche sui 21 landmark | Thread principale, GPU con ripiego su CPU |
 | **Impostazioni modelli** | `/settings` | Scegliere, caricare e precaricare i modelli | URL, file locali, id di modello | n/d | n/d |
 
 ### Come si usano
@@ -35,6 +37,8 @@ Applicazione Angular 22 che mostra cinque funzioni di intelligenza artificiale e
 | Sfondo intelligente | 1. Avvia webcam. 2. Scegli sfocato, colore pieno o immagine tua. | Intensità sfocatura da 4 a 40 px (predefinita 16), colore, immagine, inversione maschera | Bordi imprecisi con capelli o movimenti rapidi. `ctx.filter` può non funzionare su alcune versioni di Safari. |
 | Ricerca semantica | 1. Aggiungi testo, file o gli esempi. 2. Scrivi una domanda. 3. Leggi i cinque risultati più vicini con il punteggio di somiglianza. | Modello, dispositivo e sorgente nelle Impostazioni | La prima indicizzazione scarica o carica il modello. Se cambi modello, i vecchi frammenti non vengono più cercati. |
 | OCR e dati personali | 1. Scegli un'immagine. 2. Attendi la lettura. 3. Togli la spunta agli elementi che vuoi lasciare visibili. 4. Scarica l'immagine oscurata o copia il testo. | Lingue OCR e cartella dei dati lingua nelle Impostazioni | Riconosce solo formati noti. Nomi e indirizzi non vengono individuati. La qualità dipende dalla nitidezza dell'immagine. |
+| Assistente visivo | 1. Avvia la webcam o carica un'immagine. 2. Scegli «Descrivi la scena» oppure «Leggi il testo». 3. Premi «Analizza». | Modalità di analisi, voce on/off, modello e dispositivo nelle Impostazioni | La descrizione è in inglese (lingua del modello di captioning). La voce usa la sintesi del sistema operativo. |
+| Gesti siciliani | 1. Avvia la webcam. 2. Mostra un gesto e tienilo fermo per un attimo. | Voce on/off | Riconosce otto gesti con euristiche geometriche. Serve buona luce e una distanza di 40–60 cm. |
 
 ### Dati personali riconosciuti
 
@@ -246,6 +250,18 @@ Il worker riceve tre messaggi: `init` (crea la pipeline), `embed` (calcola i vet
 - **Oscuramento.** Sul canvas si disegna un rettangolo nero, con un piccolo margine, sopra ogni parola coinvolta.
 - **Controllo.** Togliendo la spunta a un elemento, il riquadro sparisce subito e il testo oscurato si aggiorna.
 - **Uscita.** Immagine PNG scaricabile e testo con i dati sostituiti da etichette come `[IBAN]` o `[EMAIL]`.
+
+### Assistente visivo
+
+- **Descrizione della scena.** Un frame della webcam (o un'immagine caricata) viene inviato al modello `image-to-text` in un Web Worker; la didascalia viene mostrata in caratteri grandi e letta ad alta voce con la sintesi vocale del sistema.
+- **Lettura del testo.** La stessa immagine passa da Tesseract; il testo riconosciuto viene letto in italiano. Utile per insegne, etichette e documenti.
+- **Privacy.** L'immagine resta sul dispositivo: non viene caricata né registrata.
+
+### Gesti siciliani
+
+- **Riconoscimento.** Si calcolano le dita estese confrontando la distanza punta–polso con quella nocca–polso, più il raggruppamento dei polpastrelli per la «pigna» e l'orientamento del pollice per «su/giù».
+- **Gesti.** Mano aperta, pugno, corna, a pigna, pollice su, pollice giù, V di pace e indice alzato. Ogni gesto compie un'azione (ferma la webcam, cambia tema, conta i «mi piace», parla, copia negli appunti, scorre la pagina).
+- **Stabilità.** Un gesto scatta solo se resta fermo per cinque fotogrammi consecutivi; per ripeterlo bisogna cambiare posizione della mano.
 
 ---
 

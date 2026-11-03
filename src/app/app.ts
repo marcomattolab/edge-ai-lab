@@ -1,11 +1,9 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { FEATURES, HOME_ICON, SETTINGS_ICON } from './core/features';
 import { ModelStore } from './core/model-store.service';
+import { ThemeService } from './core/theme.service';
 import { ToastService } from './core/toast.service';
-
-type Theme = 'light' | 'dark';
-const THEME_KEY = 'edge-ai-theme';
 
 @Component({
   selector: 'app-root',
@@ -42,13 +40,13 @@ const THEME_KEY = 'edge-ai-theme';
         }
 
         <div class="rail-footer">
-          <button class="rail-link theme-toggle" (click)="toggleTheme()">
-            @if (theme() === 'dark') {
+          <button class="rail-link theme-toggle" (click)="theme.toggle()">
+            @if (theme.theme() === 'dark') {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
             } @else {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             }
-            <span class="rail-label">{{ theme() === 'dark' ? 'Tema chiaro' : 'Tema scuro' }}</span>
+            <span class="rail-label">{{ theme.theme() === 'dark' ? 'Tema chiaro' : 'Tema scuro' }}</span>
           </button>
           <a class="rail-link settings-link" routerLink="/settings" routerLinkActive="active" (click)="closeNav()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" [innerHTML]="settingsIcon"></svg>
@@ -73,28 +71,11 @@ const THEME_KEY = 'edge-ai-theme';
 export class App {
   protected readonly store = inject(ModelStore);
   protected readonly toasts = inject(ToastService);
+  protected readonly theme = inject(ThemeService);
   protected readonly features = FEATURES;
   protected readonly homeIcon = HOME_ICON;
   protected readonly settingsIcon = SETTINGS_ICON;
   protected readonly navOpen = signal(false);
-  protected readonly theme = signal<Theme>(this.initialTheme());
-
-  constructor() {
-    effect(() => {
-      document.documentElement.dataset['theme'] = this.theme();
-      localStorage.setItem(THEME_KEY, this.theme());
-    });
-  }
-
-  private initialTheme(): Theme {
-    const saved = localStorage.getItem(THEME_KEY);
-    if (saved === 'light' || saved === 'dark') return saved;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-
-  protected toggleTheme(): void {
-    this.theme.set(this.theme() === 'dark' ? 'light' : 'dark');
-  }
 
   protected closeNav(): void {
     this.navOpen.set(false);

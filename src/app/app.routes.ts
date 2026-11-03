@@ -7,6 +7,8 @@ export const routes: Routes = [
   { path: 'background', title: 'Sfondo intelligente', loadComponent: () => import('./features/background/background').then((m) => m.Background) },
   { path: 'semantic-search', title: 'Ricerca semantica', loadComponent: () => import('./features/semantic-search/semantic-search').then((m) => m.SemanticSearch) },
   { path: 'pii-ocr', title: 'OCR e dati personali', loadComponent: () => import('./features/pii-ocr/pii-ocr').then((m) => m.PiiOcr) },
+  { path: 'vision-assist', title: 'Assistente visivo', loadComponent: () => import('./features/vision-assist/vision-assist').then((m) => m.VisionAssist) },
+  { path: 'sicilian-gestures', title: 'Gesti siciliani', loadComponent: () => import('./features/sicilian-gestures/sicilian-gestures').then((m) => m.SicilianGestures) },
   { path: 'settings', title: 'Impostazioni modelli', loadComponent: () => import('./features/settings/settings').then((m) => m.Settings) },
   { path: '**', redirectTo: 'pinch-scroll' },
 ];

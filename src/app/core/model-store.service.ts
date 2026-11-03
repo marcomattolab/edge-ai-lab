@@ -38,6 +38,7 @@ export class ModelStore {
     segmenter: idle(),
     embedding: idle(),
     ocr: idle(),
+    captioning: idle(),
   });
 
   setStatus(slot: Slot, patch: Partial<SlotStatus>): void {
@@ -92,7 +93,7 @@ export class ModelStore {
   async clearCache(): Promise<void> {
     await caches.delete(CACHE);
     await idb.clear('models');
-    this.status.set({ hand: idle(), face: idle(), segmenter: idle(), embedding: idle(), ocr: idle() });
+    this.status.set({ hand: idle(), face: idle(), segmenter: idle(), embedding: idle(), ocr: idle(), captioning: idle() });
   }
 
   private async fetchCached(slot: MpSlot, url: string, onProgress: (p: number) => void): Promise<ArrayBuffer> {

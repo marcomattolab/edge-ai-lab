@@ -30,6 +30,7 @@ export class SettingsService {
         models: { ...fresh.models, ...saved.models },
         embedding: { ...fresh.embedding, ...saved.embedding },
         ocr: { ...fresh.ocr, ...saved.ocr },
+        captioning: { ...fresh.captioning, ...saved.captioning },
       };
     } catch {
       return fresh;

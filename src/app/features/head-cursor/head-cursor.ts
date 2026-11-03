@@ -12,7 +12,8 @@ type ClickMode = 'blink' | 'jaw';
     .head-cursor.tap { animation: tap .35s; }
     @keyframes tap { 40% { box-shadow: 0 0 0 16px rgba(214,51,74,.25); } }
     .targets { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .75rem; }
-    .target { padding: 1.4rem 1rem; border-radius: 10px; border: 1px solid var(--line); background: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+    .target { padding: 1.4rem 1rem; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: inherit; font-weight: 600; cursor: pointer; transition: transform .1s, box-shadow .15s, background .15s, border-color .15s; }
+    .target:hover { border-color: var(--cobalt); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
     .target.hit { background: var(--cobalt); border-color: var(--cobalt); color: #fff; }
   `,
   template: `

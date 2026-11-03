@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { errorMessage } from '../../core/camera';
 import { ModelStore } from '../../core/model-store.service';
 import { Hit, SemanticIndexService } from '../../core/semantic-index.service';
+import { ToastService } from '../../core/toast.service';
 
 const SAMPLES: [string, string][] = [
   ['Carbonara', 'Per la carbonara servono guanciale, pecorino romano, uova e pepe nero. Niente panna: la cremina nasce dal tuorlo e dall\'acqua di cottura della pasta.'],
@@ -81,6 +82,7 @@ const SAMPLES: [string, string][] = [
 export class SemanticSearch {
   protected readonly index = inject(SemanticIndexService);
   private readonly store = inject(ModelStore);
+  private readonly toast = inject(ToastService);
 
   protected readonly docName = signal('');
   protected readonly docText = signal('');
@@ -103,6 +105,7 @@ export class SemanticSearch {
       await this.index.add(this.docName().trim() || 'Nota senza titolo', this.docText());
       this.docText.set('');
       this.docName.set('');
+      this.toast.show('Documento aggiunto all\'indice');
     });
   }
 
@@ -111,6 +114,7 @@ export class SemanticSearch {
     const files = Array.from(input.files ?? []);
     await this.guard(async () => {
       for (const f of files) await this.index.add(f.name, await f.text());
+      this.toast.show(`${files.length} file aggiunti all'indice`);
     });
     input.value = '';
   }
@@ -119,6 +123,7 @@ export class SemanticSearch {
     await this.guard(async () => {
       const known = new Set(this.index.docs());
       for (const [name, text] of SAMPLES) if (!known.has(name)) await this.index.add(name, text);
+      this.toast.show('Esempi caricati nell\'indice');
     });
   }
 

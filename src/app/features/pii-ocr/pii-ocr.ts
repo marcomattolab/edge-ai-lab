@@ -3,10 +3,11 @@ import { errorMessage } from '../../core/camera';
 import { ModelStore } from '../../core/model-store.service';
 import { OcrService, OcrWord } from '../../core/ocr.service';
 import { PiiMatch, detectPii, joinWords, wordsForMatch } from '../../core/pii';
+import { ToastService } from '../../core/toast.service';
 
 @Component({
   selector: 'app-pii-ocr',
-  styles: `.canvas-doc { width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--line); background: #f7f8fa; }`,
+  styles: `.canvas-doc { width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line); background: var(--panel-2); }`,
   template: `
     <header class="page-head">
       <h1>OCR e dati personali</h1>
@@ -65,6 +66,7 @@ import { PiiMatch, detectPii, joinWords, wordsForMatch } from '../../core/pii';
 export class PiiOcr {
   protected readonly store = inject(ModelStore);
   private readonly ocr = inject(OcrService);
+  private readonly toast = inject(ToastService);
   private readonly canvas = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
 
   protected readonly busy = signal(false);
@@ -134,10 +136,16 @@ export class PiiOcr {
       a.click();
       URL.revokeObjectURL(a.href);
     }, 'image/png');
+    this.toast.show('Immagine oscurata scaricata');
   }
 
-  protected copyText(): void {
-    void navigator.clipboard.writeText(this.redactedText());
+  protected async copyText(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(this.redactedText());
+      this.toast.show('Testo copiato negli appunti');
+    } catch {
+      this.toast.show('Impossibile copiare il testo', 'error');
+    }
   }
 
   private paint(): void {

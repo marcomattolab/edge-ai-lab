@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'pinch-scroll' },
+  { path: '', pathMatch: 'full', title: 'Edge AI Lab', loadComponent: () => import('./features/home/home').then((m) => m.Home) },
   { path: 'pinch-scroll', title: 'Pinch & Scroll', loadComponent: () => import('./features/pinch-scroll/pinch-scroll').then((m) => m.PinchScroll) },
   { path: 'head-cursor', title: 'Cursore con la testa', loadComponent: () => import('./features/head-cursor/head-cursor').then((m) => m.HeadCursor) },
   { path: 'background', title: 'Sfondo intelligente', loadComponent: () => import('./features/background/background').then((m) => m.Background) },

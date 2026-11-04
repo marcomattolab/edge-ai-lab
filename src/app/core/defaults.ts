@@ -37,7 +37,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   embedding: { modelId: 'Xenova/paraphrase-multilingual-MiniLM-L12-v2', device: 'wasm', local: true },
   ocr: { lang: 'ita+eng', langPath: '/vendor/tessdata' },
   captioning: { modelId: 'Xenova/vit-gpt2-image-captioning', device: 'wasm', local: false },
-  slm: { modelId: 'onnx-community/Qwen2.5-0.5B-Instruct', device: 'wasm', local: false },
+  slm: { modelId: 'onnx-community/gemma-3-1b-it-ONNX', device: 'wasm', local: false },
 };
 
 export const SLOT_INFO: Record<Slot, { title: string; hint: string }> = {

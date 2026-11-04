@@ -135,9 +135,11 @@ import { SlmService } from '../../core/slm.service';
         <label class="field">Modello
           <input type="text" list="slm-presets" [value]="settings.value().slm.modelId" (change)="setSlm({ modelId: $any($event.target).value.trim() })" />
           <datalist id="slm-presets">
-            <option value="onnx-community/Qwen2.5-0.5B-Instruct"></option>
-            <option value="onnx-community/SmolLM2-135M-Instruct"></option>
+            <option value="onnx-community/gemma-3-1b-it-ONNX"></option>
+            <option value="onnx-community/gemma-3-270m-it-ONNX"></option>
             <option value="onnx-community/Llama-3.2-1B-Instruct"></option>
+            <option value="onnx-community/Llama-3.2-3B-Instruct"></option>
+            <option value="onnx-community/Qwen2.5-1.5B-Instruct"></option>
           </datalist>
         </label>
         <label class="field">Dispositivo
@@ -150,7 +152,7 @@ import { SlmService } from '../../core/slm.service';
           <input type="checkbox" [checked]="settings.value().slm.local" (change)="setSlm({ local: $any($event.target).checked })" />
           <span>Usa un modello già presente in <span class="mono">public/models/</span></span>
         </label>
-        <p class="muted" style="font-size:.82rem">Un SLM può pesare qualche centinaio di MB: il primo download richiede un po' di pazienza.</p>
+        <p class="muted" style="font-size:.82rem">I modelli pesano da ~0,5 a ~2 GB: il primo download richiede pazienza. I modelli Google Gemma con suffisso <span class="mono">-ONNX</span> sono pronti all'uso (non gated).</p>
         @if (store.status().slm.state === 'loading') { <div class="meter" style="margin-top:.5rem"><i [style.width.%]="store.status().slm.progress * 100"></i></div> }
         @if (store.status().slm.message && store.status().slm.state !== 'loading') { <p class="mono muted">{{ store.status().slm.message }}</p> }
         <button class="btn" style="margin-top:.5rem" [disabled]="store.status().slm.state === 'loading'" (click)="warm('slm')">Carica ora</button>

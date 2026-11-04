@@ -61,7 +61,7 @@ const SYSTEM_PROMPT =
         @if (!messages().length) {
           <div class="empty">
             <p>👋 Ciao! Fammi una domanda: il modello risponderà un pezzo alla volta, tutto sul tuo dispositivo.</p>
-            <p class="muted" style="font-size:.85rem">Al primo invio il modello si scarica (può pesare qualche centinaio di MB) e poi resta in cache.</p>
+            <p class="muted" style="font-size:.85rem">Al primo invio il modello si scarica (può pesare da ~0,5 a ~2 GB) e poi resta in cache.</p>
           </div>
         }
         @for (m of messages(); track m.id) {

@@ -39,6 +39,11 @@ addEventListener('message', async ({ data }) => {
       postMessage({ type: 'result', id: data.id, text: content });
     }
   } catch (e) {
-    postMessage({ type: 'error', id: data.id, message: e instanceof Error ? e.message : String(e) });
+    const raw = e instanceof Error ? e.message : String(e);
+    // Messaggio più chiaro quando l'opzione "locale" è attiva ma il modello non è in public/models/.
+    const message = raw.includes('was not found locally')
+      ? 'Modello non trovato in /models/. Vai in Impostazioni → Chat SLM e disattiva "Usa un modello già presente in public/models/", oppure scarica il modello con "npm run offline".'
+      : raw;
+    postMessage({ type: 'error', id: data.id, message });
   }
 });

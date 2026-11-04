@@ -1,12 +1,15 @@
-import { Component, ElementRef, OnDestroy, inject, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, computed, inject, signal, viewChild } from '@angular/core';
 import { CameraHandle, errorMessage, startCamera as openCamera } from '../../core/camera';
 import { CaptionService } from '../../core/captioning.service';
 import { ModelStore } from '../../core/model-store.service';
 import { OcrService } from '../../core/ocr.service';
 import { joinWords } from '../../core/pii';
-import { speak as speakText, stopSpeaking } from '../../core/speech';
+import { getAvailableVoices, onVoicesChanged, speak as speakText, stopSpeaking, voicesFor } from '../../core/speech';
+import type { SpeechVoice } from '../../core/speech';
 
 type Mode = 'caption' | 'ocr';
+
+const VOICE_KEY = 'edge-ai-lab.vision-assist.voice';
 
 @Component({
   selector: 'app-vision-assist',
@@ -52,6 +55,19 @@ type Mode = 'caption' | 'ocr';
           </label>
         </div>
 
+        <div class="field" style="margin-top:.75rem">Voce dello speaker
+          <div class="row" style="margin-top:.3rem">
+            <select [value]="selectedVoiceUri()" (change)="onVoiceSelect($event)">
+              <option value="">Voce di sistema (predefinita)</option>
+              @for (v of voices(); track v.uri) {
+                <option [value]="v.uri">{{ v.name }} · {{ v.lang }}</option>
+              }
+            </select>
+            <button class="btn" (click)="previewVoice()">Prova</button>
+          </div>
+          <p class="muted" style="margin:.3rem 0 0">La voce scelta vale per la modalità corrente ({{ mode() === 'caption' ? 'descrizione in inglese' : 'lettura testo in italiano' }}).</p>
+        </div>
+
         @if (busy()) {
           <p class="muted" style="margin-top:.6rem">
             {{ mode() === 'caption' ? 'Analizzo la scena…' : 'Leggo il testo…' }}
@@ -83,7 +99,7 @@ type Mode = 'caption' | 'ocr';
     </div>
   `,
 })
-export class VisionAssist implements OnDestroy {
+export class VisionAssist implements OnInit, OnDestroy {
   protected readonly store = inject(ModelStore);
   private readonly caption = inject(CaptionService);
   private readonly ocr = inject(OcrService);
@@ -97,8 +113,20 @@ export class VisionAssist implements OnDestroy {
   protected readonly error = signal('');
   protected readonly result = signal('');
 
+  private readonly allVoices = signal<SpeechVoice[]>([]);
+  private readonly voicePrefs = signal<Record<string, string>>(this.readVoicePrefs());
+  private readonly lang = computed(() => (this.mode() === 'caption' ? 'en-US' : 'it-IT'));
+  protected readonly voices = computed(() => voicesFor(this.allVoices(), this.lang()));
+  protected readonly selectedVoiceUri = computed(() => this.voicePrefs()[this.lang()] ?? this.defaultVoiceUri());
+
   private camera?: CameraHandle;
   private bitmap?: ImageBitmap;
+  private stopVoicesListener?: () => void;
+
+  ngOnInit(): void {
+    this.refreshVoices();
+    this.stopVoicesListener = onVoicesChanged(() => this.refreshVoices());
+  }
 
   protected captionPct(): number {
     return Math.round(this.store.status().captioning.progress * 100);
@@ -108,6 +136,41 @@ export class VisionAssist implements OnDestroy {
   }
   protected onVoice(e: Event): void {
     this.voice.set((e.target as HTMLInputElement).checked);
+  }
+
+  protected onVoiceSelect(e: Event): void {
+    const uri = (e.target as HTMLSelectElement).value;
+    this.voicePrefs.update((prefs) => {
+      const next = { ...prefs, [this.lang()]: uri };
+      localStorage.setItem(VOICE_KEY, JSON.stringify(next));
+      return next;
+    });
+  }
+
+  protected previewVoice(): void {
+    const sample =
+      this.mode() === 'caption'
+        ? 'This is how the selected voice sounds.'
+        : 'Ecco come suona la voce selezionata.';
+    speakText(sample, this.lang(), 0.95, this.selectedVoiceUri());
+  }
+
+  private refreshVoices(): void {
+    this.allVoices.set(getAvailableVoices());
+  }
+
+  private defaultVoiceUri(): string {
+    // Per le descrizioni in inglese preferisci la voce Google UK Male, se disponibile.
+    if (this.lang() !== 'en-US') return '';
+    return this.allVoices().find((v) => /google.*uk.*male/i.test(v.name))?.uri ?? '';
+  }
+
+  private readVoicePrefs(): Record<string, string> {
+    try {
+      return (JSON.parse(localStorage.getItem(VOICE_KEY) ?? 'null') as Record<string, string> | null) ?? {};
+    } catch {
+      return {};
+    }
   }
 
   protected async start(): Promise<void> {
@@ -128,6 +191,7 @@ export class VisionAssist implements OnDestroy {
 
   ngOnDestroy(): void {
     this.stop();
+    this.stopVoicesListener?.();
     stopSpeaking();
   }
 
@@ -184,7 +248,7 @@ export class VisionAssist implements OnDestroy {
 
   protected speak(): void {
     // Le didascalie del modello di visione sono in inglese, il testo OCR è in italiano.
-    speakText(this.result(), this.mode() === 'caption' ? 'en-US' : 'it-IT');
+    speakText(this.result(), this.lang(), 0.95, this.selectedVoiceUri());
   }
 
   private paintBitmap(): void {

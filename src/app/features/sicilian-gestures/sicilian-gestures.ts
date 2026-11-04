@@ -14,6 +14,8 @@ interface Point {
 interface Gesture {
   id: string;
   name: string;
+  /** Parola o espressione in siciliano. */
+  sicilian: string;
   meaning: string;
   emoji: string;
   /** Esegue l'azione e restituisce il testo da registrare (o null). */
@@ -28,11 +30,16 @@ interface LogEntry {
 }
 
 const SICILIAN_PHRASES = [
-  'Che vuoi? Non ti capisco!',
+  'Chi voi? Non ti capisco!',
   'Bedda matri, che caldo!',
   'Veni cca, ti devo dire una cosa.',
   'Minchia, che bello!',
   'Unn è? Dove vai di fretta?',
+  'Ma chi si? Chi ti credi di essere?',
+  'Nun mi rumpiri i scatuli!',
+  'Nenti, nun è nenti.',
+  'Sta attentu, ca cadi!',
+  'Ammuccia, ca veni u maistru!',
 ];
 
 const STABLE_FRAMES = 5;
@@ -42,10 +49,11 @@ const dist = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y);
 @Component({
   selector: 'app-sicilian-gestures',
   styles: `
-    .gesture-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 0.6rem; }
+    .gesture-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.6rem; }
     .gesture { display: flex; align-items: center; gap: 0.7rem; padding: 0.7rem; border-radius: 10px; border: 1px solid var(--line); background: var(--panel-2); transition: border-color .15s, background .15s, box-shadow .15s; }
     .gesture.live { border-color: var(--cobalt); background: var(--cobalt-soft); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cobalt) 18%, transparent); }
     .gesture-emoji { font-size: 1.5rem; line-height: 1; flex: none; }
+    .sicilian { color: var(--cobalt); font-weight: 700; font-style: italic; font-size: 0.95rem; }
     .log { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
     .log li { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 0.7rem; border-radius: 9px; background: var(--panel-2); font-size: 0.92rem; }
     .log .time { margin-left: auto; }
@@ -53,7 +61,7 @@ const dist = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y);
   template: `
     <header class="page-head">
       <h1>Gesti siciliani</h1>
-      <p>Mostra i gesti alla webcam: l'AI li riconosce dai 21 punti della mano e compie un'azione. Il riconoscimento gira interamente nel tuo browser.</p>
+      <p>Mostra i gesti alla webcam: l'AI li riconosce dai 21 punti della mano, ti dice la parola in siciliano e compie un'azione. Tutto gira nel tuo browser.</p>
     </header>
 
     <div class="split">
@@ -86,17 +94,22 @@ const dist = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y);
         <ul class="hint">
           <li>Tieni la mano a 40–60 cm dalla camera, con una buona luce.</li>
           <li>Un gesto scatta quando resta fermo per un attimo; cambia gesto per ripeterlo.</li>
+          <li>I gesti nuovi (telefono, OK, dita incrociate) richiedono una mano ben illuminata.</li>
         </ul>
       </section>
 
       <div class="stack">
         <section class="panel">
-          <h2>Gesti riconosciuti</h2>
+          <h2>Gesti e vocabolario siciliano</h2>
           <div class="gesture-grid">
             @for (g of gestures; track g.id) {
               <div class="gesture" [class.live]="current() === g.id">
                 <span class="gesture-emoji">{{ g.emoji }}</span>
-                <div><strong>{{ g.name }}</strong><div class="muted">{{ g.meaning }}</div></div>
+                <div>
+                  <strong>{{ g.name }}</strong>
+                  <div class="sicilian">{{ g.sicilian }}</div>
+                  <div class="muted">{{ g.meaning }}</div>
+                </div>
               </div>
             }
           </div>
@@ -138,47 +151,51 @@ export class SicilianGestures implements OnDestroy {
 
   protected readonly gestures: Gesture[] = [
     {
-      id: 'open', name: 'Mano aperta', meaning: 'Basta / Fermati', emoji: '🖐',
+      id: 'open', name: 'Mano aperta', sicilian: 'Basta!', meaning: 'Fermati / Basta', emoji: '🖐',
       action: () => { this.stop(); return 'Ferma la webcam'; },
     },
     {
-      id: 'fist', name: 'Pugno', meaning: 'Niente / Chiudi', emoji: '✊',
+      id: 'fist', name: 'Pugno', sicilian: 'Nienti!', meaning: 'Niente / Chiudi', emoji: '✊',
       action: () => { this.log.set([]); return null; },
     },
     {
-      id: 'horns', name: 'Corna', meaning: 'Contro il malocchio', emoji: '🤘',
+      id: 'horns', name: 'Corna', sicilian: 'Si u bàbbaluci!', meaning: 'Contro il malocchio', emoji: '🤘',
       action: () => {
         this.theme.toggle();
         return this.theme.theme() === 'dark' ? 'Tema scuro attivato: protezione dal malocchio' : 'Tema chiaro attivato';
       },
     },
     {
-      id: 'pigna', name: 'A pigna', meaning: 'Che vuoi?', emoji: '🤌',
+      id: 'pigna', name: 'A pigna', sicilian: 'Chì booi?', meaning: 'Che vuoi? / Ma chi ti credi?', emoji: '🤌',
       action: () => SICILIAN_PHRASES[Math.floor(Math.random() * SICILIAN_PHRASES.length)],
     },
     {
-      id: 'thumbup', name: 'Pollice su', meaning: 'Tutto a posto', emoji: '👍',
+      id: 'thumbup', name: 'Pollice su', sicilian: 'Braaavu!', meaning: 'Tutto a posto / Bravo', emoji: '👍',
       action: () => { this.likes.update((n) => n + 1); return 'Mi piace +1'; },
     },
     {
-      id: 'thumbdown', name: 'Pollice giù', meaning: 'Non mi va', emoji: '👎',
+      id: 'thumbdown', name: 'Pollice giù', sicilian: 'Mi siddìia!', meaning: 'Non mi va', emoji: '👎',
       action: () => { this.likes.update((n) => n - 1); return 'Mi piace −1'; },
     },
     {
-      id: 'peace', name: 'V di pace', meaning: 'Pace', emoji: '✌️',
-      action: () => {
-        const p = navigator.clipboard?.writeText('Pace e salute!');
-        if (p) {
-          void p.then(() => this.toast.show('Copiato: Pace e salute!')).catch(() => this.toast.show('Impossibile copiare', 'error'));
-        } else {
-          this.toast.show('Copiare non è disponibile', 'error');
-        }
-        return 'Copia «Pace e salute!» negli appunti';
-      },
+      id: 'peace', name: 'V di pace', sicilian: 'Paci!', meaning: 'Pace', emoji: '✌️',
+      action: () => this.copyToClipboard('Paci!'),
     },
     {
-      id: 'one', name: 'Indice su', meaning: 'Attento / Uno', emoji: '☝️',
+      id: 'one', name: 'Indice su', sicilian: 'Staccùra!', meaning: 'Attento / Ascolta', emoji: '☝️',
       action: () => { window.scrollTo({ top: 0, behavior: 'smooth' }); return 'Scorri in cima alla pagina'; },
+    },
+    {
+      id: 'call', name: 'Telefono', sicilian: 'Ti chiamu!', meaning: 'Ti chiamo', emoji: '🤙',
+      action: () => this.copyToClipboard('Ti chiamu!'),
+    },
+    {
+      id: 'ok', name: 'OK', sicilian: 'Tutt"àppost!', meaning: 'Va bene / Perfetto', emoji: '👌',
+      action: () => { this.toast.show('Tutt"àppost!'); return 'Tutto a posto!'; },
+    },
+    {
+      id: 'crossed', name: 'Dita incrociate', sicilian: 'Speriaaaaamo!', meaning: 'Buona fortuna / Speriamo', emoji: '🤞',
+      action: () => this.copyToClipboard('Speriaaaaamo!'),
     },
   ];
 
@@ -205,12 +222,22 @@ export class SicilianGestures implements OnDestroy {
 
   protected currentLabel(): string {
     const g = this.currentGesture();
-    return g ? `${g.emoji} ${g.name}` : 'Mano non rilevata';
+    return g ? `${g.emoji} ${g.sicilian}` : 'Mano non rilevata';
   }
 
   protected clear(): void {
     this.log.set([]);
     this.likes.set(0);
+  }
+
+  private copyToClipboard(text: string): string {
+    const p = navigator.clipboard?.writeText(text);
+    if (p) {
+      void p.then(() => this.toast.show(`Copiato: ${text}`)).catch(() => this.toast.show('Impossibile copiare', 'error'));
+    } else {
+      this.toast.show('Copiare non è disponibile', 'error');
+    }
+    return `Copia «${text}» negli appunti`;
   }
 
   async start(): Promise<void> {
@@ -308,7 +335,6 @@ export class SicilianGestures implements OnDestroy {
         tipSpread = Math.max(tipSpread, dist(tips[i], tips[j]));
 
     // "A pigna" (che vuoi?): le punte delle dita convergono quasi in un punto.
-    // Non dipende dall'orientamento della mano, solo dalla convergenza dei polpastrelli.
     if (!fingersFolded && tipSpread < scale * 0.32) return 'pigna';
 
     if (fingersFolded) {
@@ -317,9 +343,19 @@ export class SicilianGestures implements OnDestroy {
       if (thumb && lm[4].y > wrist.y + 0.08) return 'thumbdown';
       return 'fist';
     }
+
+    // Telefono: pollice e mignolo tesi, indice, medio e anulare chiusi.
+    if (thumb && pinky && !index && !middle && !ring) return 'call';
+
+    // OK: pollice e indice formano un anello, le altre tre dita sono aperte.
+    if (thumb && middle && ring && pinky && dist(lm[4], lm[8]) < scale * 0.3) return 'ok';
+
     if (thumb && index && middle && ring && pinky) return 'open';
     if (index && pinky && !middle && !ring) return 'horns';
-    if (index && middle && !ring && !pinky) return 'peace';
+    if (index && middle && !ring && !pinky) {
+      // Dita incrociate: punte sovrapposte; V di pace: punte separate.
+      return dist(lm[8], lm[12]) < scale * 0.35 ? 'crossed' : 'peace';
+    }
     if (index && !middle && !ring && !pinky) return 'one';
     return null;
   }
@@ -331,6 +367,6 @@ export class SicilianGestures implements OnDestroy {
     if (text) {
       this.log.update((l) => [{ id: ++this.logId, emoji: g.emoji, text, time: new Date().toLocaleTimeString('it-IT') }, ...l].slice(0, 30));
     }
-    if (this.voice()) speak(`${g.name}: ${g.meaning}.`, 'it-IT');
+    if (this.voice()) speak(`${g.sicilian}. ${g.meaning}.`, 'it-IT');
   }
 }

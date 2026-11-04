@@ -31,6 +31,7 @@ export class SettingsService {
         embedding: { ...fresh.embedding, ...saved.embedding },
         ocr: { ...fresh.ocr, ...saved.ocr },
         captioning: { ...fresh.captioning, ...saved.captioning },
+        slm: { ...fresh.slm, ...saved.slm },
       };
     } catch {
       return fresh;

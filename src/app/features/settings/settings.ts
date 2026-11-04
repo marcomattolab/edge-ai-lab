@@ -5,6 +5,7 @@ import { EmbeddingService } from '../../core/embedding.service';
 import { ModelStore } from '../../core/model-store.service';
 import { OcrService } from '../../core/ocr.service';
 import { SettingsService } from '../../core/settings.service';
+import { SlmService } from '../../core/slm.service';
 
 @Component({
   selector: 'app-settings',
@@ -126,6 +127,36 @@ import { SettingsService } from '../../core/settings.service';
       </section>
 
       <section class="panel">
+        <div class="row" style="justify-content:space-between">
+          <h2 style="margin:0">{{ info.slm.title }}</h2>
+          <span class="badge" [class]="store.status().slm.state">{{ label(store.status().slm.state) }}</span>
+        </div>
+        <p class="muted">{{ info.slm.hint }}</p>
+        <label class="field">Modello
+          <input type="text" list="slm-presets" [value]="settings.value().slm.modelId" (change)="setSlm({ modelId: $any($event.target).value.trim() })" />
+          <datalist id="slm-presets">
+            <option value="onnx-community/Qwen2.5-0.5B-Instruct"></option>
+            <option value="onnx-community/SmolLM2-135M-Instruct"></option>
+            <option value="onnx-community/Llama-3.2-1B-Instruct"></option>
+          </datalist>
+        </label>
+        <label class="field">Dispositivo
+          <select (change)="setSlm({ device: $any($event.target).value })">
+            <option value="webgpu" [selected]="settings.value().slm.device === 'webgpu'">WebGPU (veloce)</option>
+            <option value="wasm" [selected]="settings.value().slm.device === 'wasm'">CPU / WASM (compatibile)</option>
+          </select>
+        </label>
+        <label class="row">
+          <input type="checkbox" [checked]="settings.value().slm.local" (change)="setSlm({ local: $any($event.target).checked })" />
+          <span>Usa un modello già presente in <span class="mono">public/models/</span></span>
+        </label>
+        <p class="muted" style="font-size:.82rem">Un SLM può pesare qualche centinaio di MB: il primo download richiede un po' di pazienza.</p>
+        @if (store.status().slm.state === 'loading') { <div class="meter" style="margin-top:.5rem"><i [style.width.%]="store.status().slm.progress * 100"></i></div> }
+        @if (store.status().slm.message && store.status().slm.state !== 'loading') { <p class="mono muted">{{ store.status().slm.message }}</p> }
+        <button class="btn" style="margin-top:.5rem" [disabled]="store.status().slm.state === 'loading'" (click)="warm('slm')">Carica ora</button>
+      </section>
+
+      <section class="panel">
         <h2>Accelerazione MediaPipe</h2>
         <label class="field">Delegato
           <select (change)="setDelegate($any($event.target).value)">
@@ -143,6 +174,7 @@ export class Settings {
   private readonly embeddings = inject(EmbeddingService);
   private readonly ocr = inject(OcrService);
   private readonly caption = inject(CaptionService);
+  private readonly slm = inject(SlmService);
 
   protected readonly info = SLOT_INFO;
   protected readonly mpSlots: MpSlot[] = ['hand', 'face', 'segmenter'];
@@ -177,6 +209,10 @@ export class Settings {
     this.settings.update((s) => ({ ...s, captioning: { ...s.captioning, ...patch } }));
   }
 
+  protected setSlm(patch: Partial<ReturnType<SettingsService['value']>['slm']>): void {
+    this.settings.update((s) => ({ ...s, slm: { ...s.slm, ...patch } }));
+  }
+
   protected setDelegate(delegate: 'GPU' | 'CPU'): void {
     this.settings.update((s) => ({ ...s, delegate }));
   }
@@ -186,6 +222,7 @@ export class Settings {
       if (slot === 'embedding') await this.embeddings.ensure();
       else if (slot === 'ocr') await this.ocr.ensure();
       else if (slot === 'captioning') await this.caption.ensure();
+      else if (slot === 'slm') await this.slm.ensure();
       else await this.store.load(slot);
     } catch {
       /* l'errore è già visibile nello stato dello slot */
@@ -193,6 +230,6 @@ export class Settings {
   }
 
   protected async preloadAll(): Promise<void> {
-    await Promise.allSettled((['hand', 'face', 'segmenter', 'embedding', 'ocr', 'captioning'] as Slot[]).map((s) => this.warm(s)));
+    await Promise.allSettled((['hand', 'face', 'segmenter', 'embedding', 'ocr', 'captioning', 'slm'] as Slot[]).map((s) => this.warm(s)));
   }
 }

@@ -94,7 +94,7 @@ const dist = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y);
         <ul class="hint">
           <li>Tieni la mano a 40–60 cm dalla camera, con una buona luce.</li>
           <li>Un gesto scatta quando resta fermo per un attimo; cambia gesto per ripeterlo.</li>
-          <li>I gesti nuovi (telefono, OK, dita incrociate) richiedono una mano ben illuminata.</li>
+          <li>I gesti nuovi (telefono, OK, dita incrociate, pistola) richiedono una mano ben illuminata.</li>
         </ul>
       </section>
 
@@ -196,6 +196,14 @@ export class SicilianGestures implements OnDestroy {
     {
       id: 'crossed', name: 'Dita incrociate', sicilian: 'Speriaaaaamo!', meaning: 'Buona fortuna / Speriamo', emoji: '🤞',
       action: () => this.copyToClipboard('Speriaaaaamo!'),
+    },
+    {
+      id: 'gun', name: 'Pistola', sicilian: 'Attentu ca ti sparru!', meaning: 'Per gioco / Ti sparo', emoji: '🔫',
+      action: () => { this.toast.show('Bang! 💥 (per gioco)'); return 'Bang!'; },
+    },
+    {
+      id: 'edge', name: 'Mano a taglio', sicilian: 'Statti zittu!', meaning: 'Silenzio / Un momento', emoji: '🤚',
+      action: () => { stopSpeaking(); return 'Silenzio: interrompo la voce'; },
     },
   ];
 
@@ -347,10 +355,16 @@ export class SicilianGestures implements OnDestroy {
     // Telefono: pollice e mignolo tesi, indice, medio e anulare chiusi.
     if (thumb && pinky && !index && !middle && !ring) return 'call';
 
+    // Pistola: pollice e indice tesi, le altre tre dita chiuse.
+    if (thumb && index && !middle && !ring && !pinky) return 'gun';
+
     // OK: pollice e indice formano un anello, le altre tre dita sono aperte.
     if (thumb && middle && ring && pinky && dist(lm[4], lm[8]) < scale * 0.3) return 'ok';
 
-    if (thumb && index && middle && ring && pinky) return 'open';
+    if (thumb && index && middle && ring && pinky) {
+      // Mano aperta (dita ben distese) oppure mano a taglio (dita unite e parallele).
+      return tipSpread < scale * 0.5 ? 'edge' : 'open';
+    }
     if (index && pinky && !middle && !ring) return 'horns';
     if (index && middle && !ring && !pinky) {
       // Dita incrociate: punte sovrapposte; V di pace: punte separate.

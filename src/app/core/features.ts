@@ -96,6 +96,17 @@ export const FEATURES: Feature[] = [
     tone: '#e8590c',
     icon: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
   },
+  {
+    path: 'slm-chat',
+    label: 'Chat con SLM',
+    name: 'Chat con SLM',
+    description: 'Chiacchiera con un piccolo modello linguistico che gira nel browser: risposte in streaming, zero cloud.',
+    category: 'Linguaggio',
+    learn: 'Text generation e inferenza di un LLM on-device',
+    slot: 'slm',
+    tone: '#0ca678',
+    icon: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  },
 ];
 
 export const HOME_ICON = '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>';

@@ -19,7 +19,7 @@ import { ModelStore } from '../../core/model-store.service';
       <h1>Edge AI Lab</h1>
       <p class="hero-owner">di <a href="https://www.youtube.com/@MarcoMartoranaAI" target="_blank" rel="noopener">Marco Martorana</a> · Informatica, AI e didattica</p>
       <p class="hero-sub">
-        Sette esperimenti per capire l'intelligenza artificiale toccandola con mano:
+        Otto esperimenti per capire l'intelligenza artificiale toccandola con mano:
         niente server, niente cloud, i modelli girano interamente nel tuo browser.
       </p>
       <div class="hero-actions">
@@ -27,7 +27,7 @@ import { ModelStore } from '../../core/model-store.service';
         <a class="btn" routerLink="/settings">Impostazioni modelli</a>
       </div>
       <div class="hero-stats">
-        <div class="stat"><strong>7</strong><span>esperimenti</span></div>
+        <div class="stat"><strong>8</strong><span>esperimenti</span></div>
         <div class="stat"><strong>100%</strong><span>on-device</span></div>
         <div class="stat"><strong>0</strong><span>dati inviati</span></div>
         <div class="stat"><strong>0 €</strong><span>modelli gratuiti e open source</span></div>

@@ -8,8 +8,16 @@ import { ModelStore } from '../../core/model-store.service';
   imports: [RouterLink],
   template: `
     <header class="hero">
+      <span class="hero-logo" aria-hidden="true">
+        <svg viewBox="0 0 64 64" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 46 L27 18 L40 46" stroke-width="8"/>
+          <path d="M21.5 38 L32.5 38" stroke-width="6"/>
+          <path d="M50 18 L50 46" stroke-width="8"/>
+        </svg>
+      </span>
       <span class="hero-badge">100% on-device · Nessun dato in uscita</span>
       <h1>Edge AI Lab</h1>
+      <p class="hero-owner">di <a href="https://www.youtube.com/@MarcoMartoranaAI" target="_blank" rel="noopener">Marco Martorana</a> · Informatica, AI e didattica</p>
       <p class="hero-sub">
         Cinque esperimenti di intelligenza artificiale che girano interamente nel tuo browser:
         niente server, niente cloud, i modelli restano sul tuo dispositivo.

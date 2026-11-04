@@ -18,7 +18,13 @@ import { ToastService } from './core/toast.service';
       <nav class="rail" aria-label="Sezioni">
         <div class="rail-head">
           <a class="brand" routerLink="/" (click)="closeNav()">
-            <span class="brand-mark">AI</span>
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 46 L27 18 L40 46" stroke-width="8"/>
+                <path d="M21.5 38 L32.5 38" stroke-width="6"/>
+                <path d="M50 18 L50 46" stroke-width="8"/>
+              </svg>
+            </span>
             <span class="brand-text">Edge AI Lab</span>
           </a>
           <button class="rail-close" (click)="closeNav()" aria-label="Chiudi menu">&times;</button>

@@ -201,10 +201,6 @@ export class SicilianGestures implements OnDestroy {
       id: 'gun', name: 'Pistola', sicilian: 'Attentu ca ti sparru!', meaning: 'Per gioco / Ti sparo', emoji: '🔫',
       action: () => { this.toast.show('Bang! 💥 (per gioco)'); return 'Bang!'; },
     },
-    {
-      id: 'edge', name: 'Mano a taglio', sicilian: 'Statti zittu!', meaning: 'Silenzio / Un momento', emoji: '🤚',
-      action: () => { stopSpeaking(); return 'Silenzio: interrompo la voce'; },
-    },
   ];
 
   private readonly byId = new Map(this.gestures.map((g) => [g.id, g]));
@@ -218,6 +214,8 @@ export class SicilianGestures implements OnDestroy {
   private heldFrames = 0;
   private lastId: string | null = null;
   private logId = 0;
+  // Smussamento temporale delle classificazioni (voto a maggioranza sulle ultime 3).
+  private recent: (string | null)[] = [];
 
   protected onVoice(e: Event): void {
     this.voice.set((e.target as HTMLInputElement).checked);
@@ -269,6 +267,7 @@ export class SicilianGestures implements OnDestroy {
     this.heldId = null;
     this.heldFrames = 0;
     this.current.set(null);
+    this.recent = [];
     this.status.set('idle');
   }
 
@@ -302,12 +301,17 @@ export class SicilianGestures implements OnDestroy {
       this.heldId = null;
       this.heldFrames = 0;
       this.current.set(null);
+      this.recent = [];
       return;
     }
     this.drawing?.drawConnectors(hand, HandLandmarker.HAND_CONNECTIONS, { color: '#ffffff', lineWidth: 2 });
     this.drawing?.drawLandmarks(hand, { color: '#3b5bff', radius: 3 });
 
-    const id = this.classify(hand);
+    // Classificazione statica smussata con voto a maggioranza (3 frame) per ridurre i falsi scatti.
+    this.recent.push(this.classify(hand));
+    if (this.recent.length > 3) this.recent.shift();
+    const id = this.majority(this.recent);
+
     if (id !== this.heldId) {
       this.heldId = id;
       this.heldFrames = 0;
@@ -322,12 +326,24 @@ export class SicilianGestures implements OnDestroy {
     if (!id && this.heldFrames >= STABLE_FRAMES * 2) this.lastId = null;
   }
 
+  private majority(ids: (string | null)[]): string | null {
+    const counts = new Map<string, number>();
+    for (const id of ids) if (id) counts.set(id, (counts.get(id) ?? 0) + 1);
+    let best: string | null = null;
+    let bestN = 0;
+    for (const [id, n] of counts) if (n > bestN) { bestN = n; best = id; }
+    return bestN >= 2 ? best : null;
+  }
+
   private classify(lm: Point[]): string | null {
     const wrist = lm[0];
     const scale = Math.max(dist(lm[0], lm[9]), 1e-4);
     const extended = (tip: number, pip: number) => dist(lm[tip], wrist) > dist(lm[pip], wrist);
 
-    const thumb = extended(4, 3);
+    // Il pollice è "teso" se la punta è lontana dall'attaccatura dell'indice (lm[5]);
+    // quando è piegato sul palmo la punta resta vicino alle nocche. Molto più affidabile
+    // del confronto punta/polso, che scambiava "indice su" con "pistola".
+    const thumb = dist(lm[4], lm[5]) > scale * 0.6;
     const index = extended(8, 6);
     const middle = extended(12, 10);
     const ring = extended(16, 14);
@@ -335,20 +351,20 @@ export class SicilianGestures implements OnDestroy {
 
     const fingersFolded = !index && !middle && !ring && !pinky;
 
-    // Massima distanza tra i polpastrelli di indice, medio, anulare e mignolo.
-    const tips = [lm[8], lm[12], lm[16], lm[20]];
-    let tipSpread = 0;
-    for (let i = 0; i < tips.length; i++)
-      for (let j = i + 1; j < tips.length; j++)
-        tipSpread = Math.max(tipSpread, dist(tips[i], tips[j]));
+    // "A pigna" (che vuoi?): tutte e cinque le punte convergono in un punto.
+    // Includendo il pollice si evita di confonderla con l'OK.
+    const fiveTips = [lm[4], lm[8], lm[12], lm[16], lm[20]];
+    let fiveSpread = 0;
+    for (let i = 0; i < fiveTips.length; i++)
+      for (let j = i + 1; j < fiveTips.length; j++)
+        fiveSpread = Math.max(fiveSpread, dist(fiveTips[i], fiveTips[j]));
 
-    // "A pigna" (che vuoi?): le punte delle dita convergono quasi in un punto.
-    if (!fingersFolded && tipSpread < scale * 0.32) return 'pigna';
+    if (!fingersFolded && fiveSpread < scale * 0.45) return 'pigna';
 
     if (fingersFolded) {
-      // Pollice su/giù: le altre quattro dita sono chiuse.
-      if (thumb && lm[4].y < wrist.y - 0.08) return 'thumbup';
-      if (thumb && lm[4].y > wrist.y + 0.08) return 'thumbdown';
+      // Pollice su/giù: le altre quattro dita sono chiuse. Soglia proporzionale alla mano.
+      if (thumb && lm[4].y < wrist.y - scale * 0.5) return 'thumbup';
+      if (thumb && lm[4].y > wrist.y + scale * 0.5) return 'thumbdown';
       return 'fist';
     }
 
@@ -361,10 +377,7 @@ export class SicilianGestures implements OnDestroy {
     // OK: pollice e indice formano un anello, le altre tre dita sono aperte.
     if (thumb && middle && ring && pinky && dist(lm[4], lm[8]) < scale * 0.3) return 'ok';
 
-    if (thumb && index && middle && ring && pinky) {
-      // Mano aperta (dita ben distese) oppure mano a taglio (dita unite e parallele).
-      return tipSpread < scale * 0.5 ? 'edge' : 'open';
-    }
+    if (thumb && index && middle && ring && pinky) return 'open';
     if (index && pinky && !middle && !ring) return 'horns';
     if (index && middle && !ring && !pinky) {
       // Dita incrociate: punte sovrapposte; V di pace: punte separate.

@@ -291,6 +291,15 @@ main { padding: 2rem clamp(1.1rem, 3vw, 2.75rem) 4rem; min-width: 0; }
 .hero .btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.16); border-color: rgba(255, 255, 255, 0.4); box-shadow: none; }
 .hero .btn.primary { background: #fff; color: #0f172a; border-color: #fff; box-shadow: none; }
 .hero .btn.primary:hover:not(:disabled) { background: #eef1ff; }
+.hero-stats { display: flex; flex-wrap: wrap; gap: 1.6rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.14); }
+.stat { display: grid; gap: 0.1rem; min-width: 90px; }
+.stat strong { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+.stat span { font-size: 0.82rem; color: rgba(232, 238, 248, 0.75); }
+
+.home-section { margin: 2.2rem 0; }
+.section-head { margin-bottom: 1rem; max-width: 72ch; }
+.section-head h2 { font-size: 1.35rem; margin: 0 0 0.25rem; }
+.section-head p { margin: 0; }
 
 .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.1rem; }
 
@@ -319,6 +328,19 @@ main { padding: 2rem clamp(1.1rem, 3vw, 2.75rem) 4rem; min-width: 0; }
 .feature-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
 .feature-head h2 { margin: 0; font-size: 1.05rem; }
 .feature-body p { margin: 0; color: var(--slate); font-size: 0.93rem; }
+.feature-cat {
+  align-self: flex-start; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--tone);
+  background: color-mix(in srgb, var(--tone) 12%, transparent);
+  padding: 0.18rem 0.55rem; border-radius: 999px;
+}
+.feature-learn {
+  margin: 0; font-size: 0.86rem; color: var(--ink);
+  background: color-mix(in srgb, var(--tone) 8%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--tone) 30%, transparent);
+  border-radius: 9px; padding: 0.45rem 0.6rem;
+}
+.feature-learn span { font-weight: 700; color: var(--tone); }
 .feature-arrow {
   position: absolute; top: 1.15rem; right: 1.15rem;
   color: var(--slate); font-size: 1.15rem; opacity: 0;
@@ -326,6 +348,36 @@ main { padding: 2rem clamp(1.1rem, 3vw, 2.75rem) 4rem; min-width: 0; }
 }
 .feature-card:hover .feature-arrow { opacity: 1; transform: translateX(0); }
 .home-foot { margin-top: 1.75rem; max-width: 72ch; font-size: 0.9rem; }
+
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+.step {
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 1.1rem; box-shadow: var(--shadow-sm);
+}
+.step-n {
+  display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--cobalt), var(--cobalt-2));
+  color: #fff; font-weight: 800; font-size: 0.9rem; margin-bottom: 0.6rem;
+}
+.step h3 { font-size: 1rem; margin: 0 0 0.35rem; }
+.step p { margin: 0; color: var(--slate); font-size: 0.9rem; }
+
+.channel {
+  background: linear-gradient(135deg, #101a33, #0c1322);
+  border-radius: 20px; padding: clamp(1.4rem, 3vw, 2.2rem);
+  color: #fff; box-shadow: var(--shadow-lg);
+}
+.channel h2 { color: #fff; }
+.channel .muted { color: rgba(232, 238, 248, 0.82); }
+.channel-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.9rem; margin: 1.1rem 0 1.3rem; }
+.channel-card {
+  display: grid; gap: 0.15rem; padding: 0.9rem 1rem; border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.14);
+}
+.channel-card strong { font-size: 0.95rem; }
+.channel-card span { font-size: 0.85rem; color: rgba(232, 238, 248, 0.75); }
+.channel .btn.primary { background: #fff; color: #0f172a; border-color: #fff; }
+.channel .btn.primary:hover:not(:disabled) { background: #eef1ff; }
 
 /* ============================================================
    Toasts

@@ -7,6 +7,10 @@ export interface Feature {
   /** Titolo mostrato sulla card della home. */
   name: string;
   description: string;
+  /** Categoria didattica mostrata come etichetta sulla card. */
+  category: string;
+  /** Cosa si impara, mostrato in evidenza sulla card. */
+  learn: string;
   slot: Slot;
   /** SVG interno (path, circle, ecc.) per l'icona, tratto in stile Feather. */
   icon: string;
@@ -20,6 +24,8 @@ export const FEATURES: Feature[] = [
     label: 'Pinch & Scroll',
     name: 'Pinch & Scroll',
     description: 'Pizzica pollice e indice davanti alla webcam per scorrere e cliccare, come su un touchscreen.',
+    category: 'Visione artificiale',
+    learn: 'Hand tracking e rilevamento dei landmark della mano',
     slot: 'hand',
     tone: '#3b5bff',
     icon: '<polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/>',
@@ -29,6 +35,8 @@ export const FEATURES: Feature[] = [
     label: 'Cursore con la testa',
     name: 'Cursore con la testa',
     description: 'Muovi il viso per controllare il puntatore su tutto lo schermo: sbatti le palpebre per cliccare.',
+    category: 'Visione artificiale',
+    learn: 'Face tracking e rilevamento degli ammiccamenti',
     slot: 'face',
     tone: '#e5484d',
     icon: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
@@ -38,6 +46,8 @@ export const FEATURES: Feature[] = [
     label: 'Sfondo intelligente',
     name: 'Sfondo intelligente',
     description: 'Il modello separa te dallo sfondo in tempo reale: sfoca, usa un colore o un\'immagine tua.',
+    category: 'Visione artificiale',
+    learn: 'Segmentazione semantica in tempo reale',
     slot: 'segmenter',
     tone: '#12b886',
     icon: '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
@@ -47,6 +57,8 @@ export const FEATURES: Feature[] = [
     label: 'Ricerca semantica',
     name: 'Ricerca semantica',
     description: 'Cerca nei tuoi testi per significato, non per parole esatte, con vettori calcolati nel browser.',
+    category: 'Linguaggio',
+    learn: 'Embedding e ricerca per significato, non per parole',
     slot: 'embedding',
     tone: '#7048e8',
     icon: '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
@@ -56,6 +68,8 @@ export const FEATURES: Feature[] = [
     label: 'OCR e dati personali',
     name: 'OCR e dati personali',
     description: 'Legge documenti e oscura automaticamente email, IBAN, codici fiscali e altri dati sensibili.',
+    category: 'Linguaggio',
+    learn: 'OCR e riconoscimento dei dati personali',
     slot: 'ocr',
     tone: '#f08c00',
     icon: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
@@ -65,6 +79,8 @@ export const FEATURES: Feature[] = [
     label: 'Assistente visivo',
     name: 'Assistente visivo',
     description: 'Per persone non vedenti o ipovedenti: descrive la scena o legge testi ad alta voce.',
+    category: 'Accessibilità',
+    learn: 'Image captioning e sintesi vocale',
     slot: 'captioning',
     tone: '#0ca678',
     icon: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
@@ -74,6 +90,8 @@ export const FEATURES: Feature[] = [
     label: 'Gesti siciliani',
     name: 'Gesti siciliani',
     description: 'Riconosce i gesti della mano siciliani e compie azioni: corna, a pigna, pollice su…',
+    category: 'Cultura & AI',
+    learn: 'Pose recognition e euristiche sui landmark',
     slot: 'hand',
     tone: '#e8590c',
     icon: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
